@@ -38,6 +38,8 @@ namespace keymonp
             kh = new KeyboardHook();
             kh.SetHook();
             kh.KeyPressFunction = new KeyboardHook.KeyPressProc(kh_OnKeyPress);
+            zoom_multiplier = 1.0f;
+            ResizeWindow();
         }
 
         void kh_OnKeyPress(KeyboardHook.KeyEnum k, bool pressed)
@@ -78,6 +80,33 @@ namespace keymonp
         private void DragWindow(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private String zoom_format = "";
+        private float zoom_multiplier;
+
+        private void ResizeWindow()
+        {
+            MenuItem zoomItem = (MenuItem)FindName("MenuItem_Zoom");
+            Viewbox viewbox = (Viewbox)FindName("ViewBox_Main");
+            Grid grid = (Grid)FindName("Grid_Main");
+            viewbox.Width = grid.Width * zoom_multiplier;
+            viewbox.Height = grid.Height * zoom_multiplier;
+            if (zoom_format.Equals("")) zoom_format = (String)zoomItem.Header;
+            String zoomString = String.Format(zoom_format, (int)(zoom_multiplier * 100.0f));
+            zoomItem.Header = zoomString;
+        }
+
+        private void ZoomIn_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            zoom_multiplier = Math.Min(8.0f, zoom_multiplier + 0.25f);
+            ResizeWindow();
+        }
+
+        private void ZoomOut_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            zoom_multiplier = Math.Max(0.25f, zoom_multiplier - 0.25f);
+            ResizeWindow();
         }
     }
 }

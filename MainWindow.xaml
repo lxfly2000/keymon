@@ -8,27 +8,35 @@
         Title="按键" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Closing="Window_Closing" Loaded="Window_Loaded" Topmost="True" MouseLeftButtonDown="DragWindow" WindowStyle="None">
     <Window.Resources>
         <RoutedUICommand Text="最小化" x:Key="MinimizeCommand" x:Name="Minimize"/>
+        <RoutedUICommand Text="放大" x:Key="ZoomInCommand" x:Name="ZoomIn"/>
+        <RoutedUICommand Text="缩小" x:Key="ZoomOutCommand" x:Name="ZoomOut"/>
     </Window.Resources>
-    <Grid Height="58" Width="275" Background="Black">
-        <Rectangle x:Name="rectShift" Fill="Black" HorizontalAlignment="Left" Height="28" Margin="8,15,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="66"/>
-        <Label x:Name="labelShift" Content="Shift" HorizontalAlignment="Left" VerticalAlignment="Top" Width="66" Height="28" Margin="8,15,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
-        <Rectangle x:Name="rectZ" Fill="Black" HorizontalAlignment="Left" Height="28" Margin="80,15,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="32"/>
-        <Label x:Name="labelZ" Content="Z" HorizontalAlignment="Left" VerticalAlignment="Top" Width="32" Height="28" Margin="80,15,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
-        <Rectangle x:Name="rectX" Fill="Black" HorizontalAlignment="Left" Height="28" Margin="118,15,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="32"/>
-        <Label x:Name="labelX" Content="X" HorizontalAlignment="Left" VerticalAlignment="Top" Width="32" Height="28" Margin="118,15,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
-        <Rectangle x:Name="rectC" Fill="Black" HorizontalAlignment="Left" Height="28" Margin="156,15,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="32"/>
-        <Label x:Name="labelC" Content="C" HorizontalAlignment="Left" VerticalAlignment="Top" Width="32" Height="28" Margin="156,15,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
-        <Rectangle x:Name="rectLeft" Fill="Black" HorizontalAlignment="Left" Height="26" Margin="194,28,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="26"/>
-        <Label x:Name="labelLeft" Content="←" HorizontalAlignment="Left" VerticalAlignment="Top" Width="26" Height="26" Margin="194,28,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
-        <Rectangle x:Name="rectUp" Fill="Black" HorizontalAlignment="Left" Height="26" Margin="218,4,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="26"/>
-        <Label x:Name="labelUp" Content="↑" HorizontalAlignment="Left" VerticalAlignment="Top" Width="26" Height="26" Margin="218,4,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
-        <Rectangle x:Name="rectDown" Fill="Black" HorizontalAlignment="Left" Height="26" Margin="218,28,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="26"/>
-        <Label x:Name="labelDown" Content="↓" HorizontalAlignment="Left" VerticalAlignment="Top" Width="26" Height="26" Margin="218,28,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
-        <Rectangle x:Name="rectRight" Fill="Black" HorizontalAlignment="Left" Height="26" Margin="242,28,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="26"/>
-        <Label x:Name="labelRight" Content="→" HorizontalAlignment="Left" VerticalAlignment="Top" Width="26" Height="26" Margin="242,28,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
-    </Grid>
+    <Viewbox Stretch="Fill" Name="ViewBox_Main">
+        <Grid Height="58" Width="275" Background="Black" Name="Grid_Main">
+            <Rectangle x:Name="rectShift" Fill="Black" HorizontalAlignment="Left" Height="28" Margin="8,15,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="66"/>
+            <Label x:Name="labelShift" Content="Shift" HorizontalAlignment="Left" VerticalAlignment="Top" Width="66" Height="28" Margin="8,15,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
+            <Rectangle x:Name="rectZ" Fill="Black" HorizontalAlignment="Left" Height="28" Margin="80,15,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="32"/>
+            <Label x:Name="labelZ" Content="Z" HorizontalAlignment="Left" VerticalAlignment="Top" Width="32" Height="28" Margin="80,15,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
+            <Rectangle x:Name="rectX" Fill="Black" HorizontalAlignment="Left" Height="28" Margin="118,15,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="32"/>
+            <Label x:Name="labelX" Content="X" HorizontalAlignment="Left" VerticalAlignment="Top" Width="32" Height="28" Margin="118,15,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
+            <Rectangle x:Name="rectC" Fill="Black" HorizontalAlignment="Left" Height="28" Margin="156,15,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="32"/>
+            <Label x:Name="labelC" Content="C" HorizontalAlignment="Left" VerticalAlignment="Top" Width="32" Height="28" Margin="156,15,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
+            <Rectangle x:Name="rectLeft" Fill="Black" HorizontalAlignment="Left" Height="26" Margin="194,28,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="26"/>
+            <Label x:Name="labelLeft" Content="←" HorizontalAlignment="Left" VerticalAlignment="Top" Width="26" Height="26" Margin="194,28,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
+            <Rectangle x:Name="rectUp" Fill="Black" HorizontalAlignment="Left" Height="26" Margin="218,4,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="26"/>
+            <Label x:Name="labelUp" Content="↑" HorizontalAlignment="Left" VerticalAlignment="Top" Width="26" Height="26" Margin="218,4,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
+            <Rectangle x:Name="rectDown" Fill="Black" HorizontalAlignment="Left" Height="26" Margin="218,28,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="26"/>
+            <Label x:Name="labelDown" Content="↓" HorizontalAlignment="Left" VerticalAlignment="Top" Width="26" Height="26" Margin="218,28,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
+            <Rectangle x:Name="rectRight" Fill="Black" HorizontalAlignment="Left" Height="26" Margin="242,28,0,0" Stroke="White" StrokeThickness="2" VerticalAlignment="Top" Width="26"/>
+            <Label x:Name="labelRight" Content="→" HorizontalAlignment="Left" VerticalAlignment="Top" Width="26" Height="26" Margin="242,28,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="SimSun" FontSize="16" Foreground="White"/>
+        </Grid>
+    </Viewbox>
     <Window.ContextMenu>
         <ContextMenu>
+            <MenuItem Header="调整尺寸(_S)[{0}%]" Name="MenuItem_Zoom">
+                <MenuItem Header="放大(_I)" InputGestureText="=" Command="{StaticResource ZoomInCommand}"/>
+                <MenuItem Header="缩小(_O)" InputGestureText="-" Command="{StaticResource ZoomOutCommand}"/>
+            </MenuItem>
             <MenuItem Header="帮助(_H)……" Command="ApplicationCommands.Help"/>
             <MenuItem Header="最小化(_M)" Command="{StaticResource MinimizeCommand}"/>
             <MenuItem Header="关闭(_C)" Command="ApplicationCommands.Close"/>
@@ -38,5 +46,11 @@
         <CommandBinding Command="ApplicationCommands.Help" Executed="ShowTips_Executed"/>
         <CommandBinding Command="ApplicationCommands.Close" Executed="Close_Executed"/>
         <CommandBinding Command="{StaticResource MinimizeCommand}" Executed="Minimize_Executed"/>
+        <CommandBinding Command="{StaticResource ZoomInCommand}" Executed="ZoomIn_Executed"/>
+        <CommandBinding Command="{StaticResource ZoomOutCommand}" Executed="ZoomOut_Executed"/>
     </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Key="OemPlus" Command="{StaticResource ZoomInCommand}"/>
+        <KeyBinding Key="OemMinus" Command="{StaticResource ZoomOutCommand}"/>
+    </Window.InputBindings>
 </Window>
