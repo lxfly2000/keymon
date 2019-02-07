@@ -1,6 +1,6 @@
 # 按键显示程序
-* C++版：[keymon](https://github.com/lxfly2000/keymon/keymon)
-* WPF版：[keymonp](https://github.com/lxfly2000/keymon/keymonp)
+* C++版：[keymon](keymon)
+* WPF版：[keymonp](keymonp)
 
 ## 下载
 [GitHub](https://github.com/lxfly2000/keymon/releases)  
