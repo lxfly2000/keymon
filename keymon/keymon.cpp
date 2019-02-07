@@ -30,8 +30,21 @@ struct KeyManager
 {
 	bool keys[KEYS_NUM];
 	Gdiplus::RectF rkeys[KEYS_NUM];
+	TCHAR fontName[256];
+	BYTE foreColorR, foreColorG, foreColorB, backColorR, backColorG, backColorB;
+	float lineWidth;
+	float fontSize;
 	void ResetKeySize()
 	{
+		GetPrivateProfileString(TEXT("keymon"), TEXT("fontName"), TEXT("ËÎÌו"), fontName, ARRAYSIZE(fontName) - 1, TEXT(".\\keymon.ini"));
+		foreColorR = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorR"), 255, TEXT(".\\keymon.ini"));
+		foreColorG = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorG"), 255, TEXT(".\\keymon.ini"));
+		foreColorB = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorB"), 255, TEXT(".\\keymon.ini"));
+		backColorR = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorR"), 0, TEXT(".\\keymon.ini"));
+		backColorG = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorG"), 0, TEXT(".\\keymon.ini"));
+		backColorB = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorB"), 0, TEXT(".\\keymon.ini"));
+		lineWidth = (float)GetPrivateProfileInt(TEXT("keymon"), TEXT("lineWidth"), 2, TEXT(".\\keymon.ini"));
+		fontSize = (float)GetPrivateProfileInt(TEXT("keymon"), TEXT("fontSize"), 16, TEXT(".\\keymon.ini"));
 		int nShowKeys = 0;
 		for (int i = 0; i < 255; i++)
 		{
@@ -42,7 +55,7 @@ struct KeyManager
 			{
 				int l,t,r,b;
 				TCHAR caps[16];
-				swscanf(line,TEXT("%d,%d,%d,%d,%s"),&l,&t,&r,&b,caps);
+				swscanf_s(line, TEXT("%d,%d,%d,%d,%s"), &l, &t, &r, &b, caps, ARRAYSIZE(caps) - 1);
 				rkeys[i] = { S.X((float)l),S.Y((float)t),S.X((float)r),S.Y((float)b) };
 				szKeys[i] = caps;
 				nShowKeys++;
@@ -75,7 +88,7 @@ struct KeyManager
 	{
 		if (keys[key] == v)return;
 		keys[key] = v;
-		RECT r = { rkeys[key].X,rkeys[key].Y,rkeys[key].X + rkeys[key].Width,rkeys[key].Y + rkeys[key].Height };
+		RECT r = { (LONG)rkeys[key].X,(LONG)rkeys[key].Y,(LONG)(rkeys[key].X + rkeys[key].Width),(LONG)(rkeys[key].Y + rkeys[key].Height) };
 		InvalidateRect(h, &r, FALSE);
 	}
 }km;
@@ -184,12 +197,12 @@ void OnPaint(HWND h, WPARAM w, LPARAM l)
 	ULONG_PTR gpToken;
 	Gdiplus::GdiplusStartup(&gpToken, &gsi, NULL);
 	Gdiplus::Graphics gr(hDC);
-	Gdiplus::Font textFont(TEXT("ËÎÌו"), S.P(16));
+	Gdiplus::Font textFont(km.fontName, S.P(km.fontSize));
 	Gdiplus::StringFormat sf;
 	sf.SetAlignment(Gdiplus::StringAlignmentCenter);
 	sf.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-	Gdiplus::Pen whitePen(Gdiplus::Color(255, 255, 255), S.P(2.0f));
-	Gdiplus::SolidBrush whiteBrush(Gdiplus::Color(255, 255, 255)), blackBrush(Gdiplus::Color(0, 0, 0));
+	Gdiplus::Pen whitePen(Gdiplus::Color(km.foreColorR, km.foreColorG, km.foreColorB), S.P(km.lineWidth));
+	Gdiplus::SolidBrush whiteBrush(Gdiplus::Color(km.foreColorR, km.foreColorG, km.foreColorB)), blackBrush(Gdiplus::Color(km.backColorR, km.backColorG, km.backColorB));
 	gr.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 	gr.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
 	//gr.FillRectangle(&blackBrush, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);

@@ -7,10 +7,20 @@
 ## INI文件格式
 ```ini
 [keymon]
-;窗口宽
-width=275
-;窗口高
-height=58
+width=275 ;窗口宽
+height=58 ;窗口高
+;字体
+fontName=宋体
+fontSize=16 ;字号
+lineWidth=2 ;线宽
+;前景色
+foreColorR=255
+foreColorG=255
+foreColorB=255
+;背景色
+backColorR=0
+backColorG=0
+backColorB=0
 
 ;<十进制表示虚拟键码>=<左边框>,<上边框>,<边框宽>,<边框高>,<16字以内键名>
 160=8,15,66,28,Shift
