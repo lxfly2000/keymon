@@ -191,8 +191,8 @@ void OnPaint(HWND h, WPARAM w, LPARAM l)
 {
 	PAINTSTRUCT ps;
 	HDC hDC = BeginPaint(h, &ps);
-	//RECT clientRect;
-	//GetClientRect(h, &clientRect);
+	RECT clientRect;
+	GetClientRect(h, &clientRect);
 	Gdiplus::GdiplusStartupInput gsi;
 	ULONG_PTR gpToken;
 	Gdiplus::GdiplusStartup(&gpToken, &gsi, NULL);
@@ -205,7 +205,7 @@ void OnPaint(HWND h, WPARAM w, LPARAM l)
 	Gdiplus::SolidBrush whiteBrush(Gdiplus::Color(km.foreColorR, km.foreColorG, km.foreColorB)), blackBrush(Gdiplus::Color(km.backColorR, km.backColorG, km.backColorB));
 	gr.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 	gr.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
-	//gr.FillRectangle(&blackBrush, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
+	gr.FillRectangle(&blackBrush, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
 	for (int i = 0; i < ARRAYSIZE(km.keys); i++)
 	{
 		if (km.szKeys[i][0])
