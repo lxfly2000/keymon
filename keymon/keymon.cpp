@@ -285,7 +285,7 @@ LRESULT CALLBACK ProcessHook(int c, WPARAM w, LPARAM l)
 	if (c == HC_ACTION)
 		switch (w)
 		{
-		case WM_KEYDOWN:case WM_KEYUP:
+		case WM_KEYDOWN:case WM_KEYUP:case WM_SYSKEYDOWN:case WM_SYSKEYUP:
 			km.SetKey(((PKBDLLHOOKSTRUCT)l)->vkCode, w == WM_KEYDOWN, hWindow);
 			break;
 		}
