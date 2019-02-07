@@ -34,8 +34,10 @@ struct KeyManager
 	BYTE foreColorR, foreColorG, foreColorB, backColorR, backColorG, backColorB;
 	float lineWidth;
 	float fontSize;
+	DWORD lastVkCode;
 	void ResetKeySize()
 	{
+		lastVkCode = 0;
 		GetPrivateProfileString(TEXT("keymon"), TEXT("fontName"), TEXT("ËÎÌו"), fontName, ARRAYSIZE(fontName) - 1, TEXT(".\\keymon.ini"));
 		foreColorR = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorR"), 255, TEXT(".\\keymon.ini"));
 		foreColorG = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorG"), 255, TEXT(".\\keymon.ini"));
@@ -88,6 +90,7 @@ struct KeyManager
 	{
 		if (keys[key] == v)return;
 		keys[key] = v;
+		lastVkCode = key;
 		RECT r = { (LONG)rkeys[key].X,(LONG)rkeys[key].Y,(LONG)(rkeys[key].X + rkeys[key].Width),(LONG)(rkeys[key].Y + rkeys[key].Height) };
 		InvalidateRect(h, &r, FALSE);
 	}
@@ -205,14 +208,26 @@ void OnPaint(HWND h, WPARAM w, LPARAM l)
 	Gdiplus::SolidBrush whiteBrush(Gdiplus::Color(km.foreColorR, km.foreColorG, km.foreColorB)), blackBrush(Gdiplus::Color(km.backColorR, km.backColorG, km.backColorB));
 	gr.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 	gr.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
-	gr.FillRectangle(&blackBrush, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
-	for (int i = 0; i < ARRAYSIZE(km.keys); i++)
+	if (km.lastVkCode)
 	{
-		if (km.szKeys[i][0])
+		if (km.szKeys[km.lastVkCode][0])
 		{
-			gr.FillRectangle(km.keys[i] ? &whiteBrush : &blackBrush, km.rkeys[i]);
-			gr.DrawRectangle(&whitePen, km.rkeys[i]);
-			gr.DrawString(km.szKeys[i].c_str(), km.szKeys[i].size(), &textFont, km.rkeys[i], &sf, km.keys[i] ? &blackBrush : &whiteBrush);
+			gr.FillRectangle(km.keys[km.lastVkCode] ? &whiteBrush : &blackBrush, km.rkeys[km.lastVkCode]);
+			gr.DrawRectangle(&whitePen, km.rkeys[km.lastVkCode]);
+			gr.DrawString(km.szKeys[km.lastVkCode].c_str(), km.szKeys[km.lastVkCode].size(), &textFont, km.rkeys[km.lastVkCode], &sf, km.keys[km.lastVkCode] ? &blackBrush : &whiteBrush);
+		}
+	}
+	else
+	{
+		gr.FillRectangle(&blackBrush, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
+		for (int i = 0; i < ARRAYSIZE(km.keys); i++)
+		{
+			if (km.szKeys[i][0])
+			{
+				gr.FillRectangle(km.keys[i] ? &whiteBrush : &blackBrush, km.rkeys[i]);
+				gr.DrawRectangle(&whitePen, km.rkeys[i]);
+				gr.DrawString(km.szKeys[i].c_str(), km.szKeys[i].size(), &textFont, km.rkeys[i], &sf, km.keys[i] ? &blackBrush : &whiteBrush);
+			}
 		}
 	}
 	EndPaint(h, &ps);
@@ -240,6 +255,8 @@ LRESULT CALLBACK ProcessMessage(HWND h, UINT m, WPARAM w, LPARAM l)
 		SetWindowLongPtr(h, GWL_STYLE, ws.GetStyle());
 		SetWindowPos(h, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
 		MoveWindow(h, rWindow.left, rWindow.top, rWindow.right - rWindow.left, rWindow.bottom - rWindow.top, TRUE);
+	case WM_SIZE:
+		km.lastVkCode = 0;
 		break;
 	case WM_LBUTTONDOWN:
 		SetCapture(h);
