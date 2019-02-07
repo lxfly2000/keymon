@@ -260,8 +260,8 @@ LRESULT CALLBACK ProcessMessage(HWND h, UINT m, WPARAM w, LPARAM l)
 		case ID_MENU_CLOSE:PostQuitMessage(0); break;
 		case IDM_ZOOM_IN:ws.SetZoom(min(ws.GetZoom() + 0.25f, 8.0f)); break;
 		case IDM_ZOOM_OUT:ws.SetZoom(max(ws.GetZoom() - 0.25f, 0.25f)); break;
-		case IDM_ALPHA_INCREASE:ws.SetAlpha(min(ws.GetAlpha() + 0.05f, 1.0f)); break;
-		case IDM_ALPHA_DECREASE:ws.SetAlpha(max(ws.GetAlpha() - 0.05f, 0.05f)); break;
+		case IDM_ALPHA_INCREASE:ws.SetAlpha(min(ws.GetAlpha() + 0.25f, 1.0f)); break;
+		case IDM_ALPHA_DECREASE:ws.SetAlpha(max(ws.GetAlpha() - 0.25f, 0.25f)); break;
 		}
 		break;
 	}
@@ -290,7 +290,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR szCmdLi
 	//Éú³É´°¿Ú
 	PCTSTR wcl_name = TEXT("KeyWindow");
 	if (!RegWindowClass(hInstance, ProcessMessage, wcl_name))return -1;
-	LONG ww = S.X(GetPrivateProfileInt(TEXT("keymon"),TEXT("width"),275,TEXT(".\\keymon.ini"))), wh = S.Y(GetPrivateProfileInt(TEXT("keymon"),TEXT("width"),58,TEXT(".\\keymon.ini")));
+	LONG ww = S.X(GetPrivateProfileInt(TEXT("keymon"),TEXT("width"),275,TEXT(".\\keymon.ini"))), wh = S.Y(GetPrivateProfileInt(TEXT("keymon"),TEXT("height"),58,TEXT(".\\keymon.ini")));
 	RECT rWindow = { 0,0,ww,wh };
 	ws.SetStyle(WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
 	ws.SetExStyle(WS_EX_APPWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED);
