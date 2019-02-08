@@ -303,7 +303,10 @@ LRESULT CALLBACK ProcessHook(int c, WPARAM w, LPARAM l)
 		switch (w)
 		{
 		case WM_KEYDOWN:case WM_KEYUP:case WM_SYSKEYDOWN:case WM_SYSKEYUP:
-			km.SetKey(((PKBDLLHOOKSTRUCT)l)->vkCode, w == WM_KEYDOWN, hWindow);
+			PKBDLLHOOKSTRUCT pk = (PKBDLLHOOKSTRUCT)l;
+			if ((pk->vkCode == VK_RETURN) && (pk->flags&LLKHF_EXTENDED))
+				pk->vkCode = VK_SEPARATOR;
+			km.SetKey(pk->vkCode, !(pk->flags&LLKHF_UP), hWindow);
 			break;
 		}
 	return CallNextHookEx(NULL, c, w, l);
