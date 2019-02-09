@@ -94,6 +94,23 @@ struct KeyManager
 		RECT r = { (LONG)rkeys[key].X,(LONG)rkeys[key].Y,(LONG)(rkeys[key].X + rkeys[key].Width),(LONG)(rkeys[key].Y + rkeys[key].Height) };
 		InvalidateRect(h, &r, FALSE);
 	}
+	void DrawKey(Gdiplus::Graphics &gr, Gdiplus::Pen &pen, Gdiplus::Brush &brF, Gdiplus::Brush &brB, Gdiplus::Font &font, Gdiplus::StringFormat &sf, DWORD vk)
+	{
+		gr.FillRectangle(keys[vk] ? &brF : &brB, rkeys[vk]);
+		if (vk == VK_CAPITAL || vk == VK_SCROLL || vk == VK_NUMLOCK)
+		{
+			float borderLen = min(rkeys[vk].Width, rkeys[vk].Height) / 3;
+			Gdiplus::PointF triPoints[3] = { Gdiplus::PointF(rkeys[vk].GetLeft(),rkeys[vk].GetTop()),
+				Gdiplus::PointF(rkeys[vk].GetLeft() + borderLen,rkeys[vk].GetTop()),
+				Gdiplus::PointF(rkeys[vk].GetLeft(),rkeys[vk].GetTop() + borderLen) };
+			if (GetKeyState(vk) & 1)
+				gr.FillPolygon(&brF, triPoints, ARRAYSIZE(triPoints));
+			else
+				gr.DrawLine(&pen, triPoints[1], triPoints[2]);
+		}
+		gr.DrawRectangle(&pen, rkeys[vk]);
+		gr.DrawString(szKeys[vk].c_str(), szKeys[vk].size(), &font, rkeys[vk], &sf, keys[vk] ? &brB : &brF);
+	}
 }km;
 HWND hWindow = NULL;
 POINT posMouseClick;
@@ -211,11 +228,7 @@ void OnPaint(HWND h, WPARAM w, LPARAM l)
 	if (km.lastVkCode)
 	{
 		if (km.szKeys[km.lastVkCode][0])
-		{
-			gr.FillRectangle(km.keys[km.lastVkCode] ? &whiteBrush : &blackBrush, km.rkeys[km.lastVkCode]);
-			gr.DrawRectangle(&whitePen, km.rkeys[km.lastVkCode]);
-			gr.DrawString(km.szKeys[km.lastVkCode].c_str(), km.szKeys[km.lastVkCode].size(), &textFont, km.rkeys[km.lastVkCode], &sf, km.keys[km.lastVkCode] ? &blackBrush : &whiteBrush);
-		}
+			km.DrawKey(gr, whitePen, whiteBrush, blackBrush, textFont, sf, km.lastVkCode);
 	}
 	else
 	{
@@ -223,11 +236,7 @@ void OnPaint(HWND h, WPARAM w, LPARAM l)
 		for (int i = 0; i < ARRAYSIZE(km.keys); i++)
 		{
 			if (km.szKeys[i][0])
-			{
-				gr.FillRectangle(km.keys[i] ? &whiteBrush : &blackBrush, km.rkeys[i]);
-				gr.DrawRectangle(&whitePen, km.rkeys[i]);
-				gr.DrawString(km.szKeys[i].c_str(), km.szKeys[i].size(), &textFont, km.rkeys[i], &sf, km.keys[i] ? &blackBrush : &whiteBrush);
-			}
+				km.DrawKey(gr, whitePen, whiteBrush, blackBrush, textFont, sf, i);
 		}
 	}
 	EndPaint(h, &ps);
