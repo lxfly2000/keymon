@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:keymonp"
         mc:Ignorable="d"
-        Title="按键" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Closing="Window_Closing" Loaded="Window_Loaded" Topmost="True" MouseLeftButtonDown="DragWindow" WindowStyle="None">
+        Title="按键" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Closing="Window_Closing" Loaded="Window_Loaded" Topmost="True" MouseLeftButtonDown="DragWindow" WindowStyle="None" AllowsTransparency="True">
     <Window.Resources>
         <RoutedUICommand Text="最小化" x:Key="MinimizeCommand" x:Name="Minimize"/>
         <RoutedUICommand Text="放大" x:Key="ZoomInCommand" x:Name="ZoomIn"/>
         <RoutedUICommand Text="缩小" x:Key="ZoomOutCommand" x:Name="ZoomOut"/>
+        <RoutedUICommand Text="增加" x:Key="AlphaIncreaseCommand" x:Name="AlphaIncrease"/>
+        <RoutedUICommand Text="减小" x:Key="AlphaDecreaseCommand" x:Name="AlphaDecrease"/>
     </Window.Resources>
     <Viewbox Stretch="Fill" Name="ViewBox_Main">
         <Grid Height="58" Width="275" Background="Black" Name="Grid_Main">
@@ -37,6 +39,10 @@
                 <MenuItem Header="放大(_I)" InputGestureText="=" Command="{StaticResource ZoomInCommand}"/>
                 <MenuItem Header="缩小(_O)" InputGestureText="-" Command="{StaticResource ZoomOutCommand}"/>
             </MenuItem>
+            <MenuItem Header="不透明度(_A)[{0}%]" Name="MenuItem_Alpha">
+                <MenuItem Header="增加(_I)" InputGestureText="PgUp" Command="{StaticResource AlphaIncreaseCommand}"/>
+                <MenuItem Header="减小(_D)" InputGestureText="PgDn" Command="{StaticResource AlphaDecreaseCommand}"/>
+            </MenuItem>
             <MenuItem Header="帮助(_H)……" Command="ApplicationCommands.Help"/>
             <MenuItem Header="最小化(_M)" Command="{StaticResource MinimizeCommand}"/>
             <MenuItem Header="关闭(_C)" Command="ApplicationCommands.Close"/>
@@ -48,9 +54,13 @@
         <CommandBinding Command="{StaticResource MinimizeCommand}" Executed="Minimize_Executed"/>
         <CommandBinding Command="{StaticResource ZoomInCommand}" Executed="ZoomIn_Executed"/>
         <CommandBinding Command="{StaticResource ZoomOutCommand}" Executed="ZoomOut_Executed"/>
+        <CommandBinding Command="{StaticResource AlphaIncreaseCommand}" Executed="Alpha_Executed"/>
+        <CommandBinding Command="{StaticResource AlphaDecreaseCommand}" Executed="Alpha_Executed"/>
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Key="OemPlus" Command="{StaticResource ZoomInCommand}"/>
         <KeyBinding Key="OemMinus" Command="{StaticResource ZoomOutCommand}"/>
+        <KeyBinding Key="PageUp" Command="{StaticResource AlphaIncreaseCommand}"/>
+        <KeyBinding Key="PageDown" Command="{StaticResource AlphaDecreaseCommand}"/>
     </Window.InputBindings>
 </Window>

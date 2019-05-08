@@ -32,6 +32,7 @@ namespace keymonp
             kh.KeyPressFunction = new KeyboardHook.KeyPressProc(kh_OnKeyPress);
             zoom_multiplier = 1.0f;
             ResizeWindow();
+            UpdateOpacity();
         }
 
         void kh_OnKeyPress(KeyboardHook.KeyEnum k, bool pressed)
@@ -99,6 +100,25 @@ namespace keymonp
         {
             zoom_multiplier = Math.Max(0.25f, zoom_multiplier - 0.25f);
             ResizeWindow();
+        }
+
+        private String alpha_format = "";
+
+        private void UpdateOpacity()
+        {
+            MenuItem item = (MenuItem)FindName("MenuItem_Alpha");
+            if (alpha_format.Equals(""))
+                alpha_format = (String)item.Header;
+            item.Header = String.Format(alpha_format, (int)(Opacity * 100.0f));
+        }
+
+        private void Alpha_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (e.Command == Resources["AlphaIncreaseCommand"])
+                Opacity = Math.Min(1.0, Opacity + 0.25);
+            else
+                Opacity = Math.Max(0.25, Opacity - 0.25);
+            UpdateOpacity();
         }
     }
 }
