@@ -1,6 +1,7 @@
 #include<Windows.h>
 #include<gdiplus.h>
 #include<string>
+#include<regex>
 #include"resource.h"
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #pragma comment(lib,"gdiplus.lib")
@@ -26,6 +27,19 @@ private:
 	int sx, sy;
 	float zoom;
 }S;
+std::wstring hex_replace(std::wstring str)
+{
+	std::wsmatch m;
+	while (std::regex_search(str, m, std::wregex(TEXT("<([0-9A-F]+)>"))))
+	{
+		DWORD c;
+		swscanf_s(m.str(1).c_str(), TEXT("%X"), &c);
+		std::wstring sr;
+		sr.push_back((WCHAR)c);
+		str = std::regex_replace(str, std::wregex(m.str(0)), sr);
+	}
+	return str;
+}
 struct KeyManager
 {
 	bool keys[KEYS_NUM];
@@ -35,31 +49,34 @@ struct KeyManager
 	float lineWidth;
 	float fontSize;
 	DWORD lastVkCode;
-	void ResetKeySize()
+	void ResetKeySize(LPCTSTR configFile)
 	{
 		lastVkCode = 0;
-		GetPrivateProfileString(TEXT("keymon"), TEXT("fontName"), TEXT("宋体"), fontName, ARRAYSIZE(fontName) - 1, TEXT(".\\keymon.ini"));
-		foreColorR = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorR"), 255, TEXT(".\\keymon.ini"));
-		foreColorG = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorG"), 255, TEXT(".\\keymon.ini"));
-		foreColorB = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorB"), 255, TEXT(".\\keymon.ini"));
-		backColorR = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorR"), 0, TEXT(".\\keymon.ini"));
-		backColorG = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorG"), 0, TEXT(".\\keymon.ini"));
-		backColorB = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorB"), 0, TEXT(".\\keymon.ini"));
-		lineWidth = (float)GetPrivateProfileInt(TEXT("keymon"), TEXT("lineWidth"), 2, TEXT(".\\keymon.ini"));
-		fontSize = (float)GetPrivateProfileInt(TEXT("keymon"), TEXT("fontSize"), 16, TEXT(".\\keymon.ini"));
+		GetPrivateProfileString(TEXT("keymon"), TEXT("fontName"), TEXT("宋体"), fontName, ARRAYSIZE(fontName) - 1, configFile);
+		foreColorR = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorR"), 255, configFile);
+		foreColorG = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorG"), 255, configFile);
+		foreColorB = GetPrivateProfileInt(TEXT("keymon"), TEXT("foreColorB"), 255, configFile);
+		backColorR = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorR"), 0, configFile);
+		backColorG = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorG"), 0, configFile);
+		backColorB = GetPrivateProfileInt(TEXT("keymon"), TEXT("backColorB"), 0, configFile);
+		lineWidth = (float)GetPrivateProfileInt(TEXT("keymon"), TEXT("lineWidth"), 2, configFile);
+		fontSize = (float)GetPrivateProfileInt(TEXT("keymon"), TEXT("fontSize"), 16, configFile);
 		int nShowKeys = 0;
 		for (int i = 0; i < 255; i++)
 		{
 			TCHAR line[256], szVkCode[16];
 			wsprintf(szVkCode, TEXT("%d"), i);
-			GetPrivateProfileString(TEXT("keymon"),szVkCode,TEXT(""),line,ARRAYSIZE(line)-1,TEXT(".\\keymon.ini"));
+			GetPrivateProfileString(TEXT("keymon"),szVkCode,TEXT(""),line,ARRAYSIZE(line)-1,configFile);
+			szKeys[i].clear();
+			szFonts[i].clear();
 			if (line[0])
 			{
 				int l,t,r,b;
-				TCHAR caps[16];
-				swscanf_s(line, TEXT("%d,%d,%d,%d,%s"), &l, &t, &r, &b, caps, ARRAYSIZE(caps) - 1);
+				TCHAR caps[256]{}, fonts[256]{};
+				swscanf_s(line, TEXT("%d,%d,%d,%d,%[^,],%s"), &l, &t, &r, &b, caps, ARRAYSIZE(caps) - 1, fonts, ARRAYSIZE(fonts) - 1);
 				rkeys[i] = { S.X((float)l),S.Y((float)t),S.X((float)r),S.Y((float)b) };
-				szKeys[i] = caps;
+				szKeys[i] = hex_replace(caps);
+				szFonts[i] = hex_replace(fonts);
 				nShowKeys++;
 			}
 		}
@@ -85,7 +102,7 @@ struct KeyManager
 			szKeys[VK_RIGHT]=TEXT("→");
 		}
 	}
-	std::wstring szKeys[KEYS_NUM];
+	std::wstring szKeys[KEYS_NUM],szFonts[KEYS_NUM];
 	void SetKey(DWORD key, bool v, HWND h)
 	{
 		if (keys[key] == v)return;
@@ -109,7 +126,8 @@ struct KeyManager
 				gr.DrawLine(&pen, triPoints[1], triPoints[2]);
 		}
 		gr.DrawRectangle(&pen, rkeys[vk]);
-		gr.DrawString(szKeys[vk].c_str(), szKeys[vk].size(), &font, rkeys[vk], &sf, keys[vk] ? &brB : &brF);
+		gr.DrawString(szKeys[vk].c_str(), szKeys[vk].size(), szFonts[vk].length() ? &Gdiplus::Font(szFonts[vk].c_str(), S.P(km.fontSize)) : &font,
+			rkeys[vk], &sf, keys[vk] ? &brB : &brF);
 	}
 }km;
 HWND hWindow = NULL;
@@ -124,8 +142,9 @@ private:
 	HWND m_hWindow;
 	TCHAR menuTextFmt[20] = TEXT(""), menuAlphaFmt[20] = TEXT("");
 	int wstyle, wexstyle;
+	TCHAR szUsingLayout[MAX_PATH];
 public:
-	WindowSize() :zoom_multiplier(1.0f), alpha(1.0f)
+	WindowSize() :zoom_multiplier(1.0f), alpha(1.0f), szUsingLayout()
 	{
 	}
 	void SetOriginalSize(HWND hwnd, int w, int h)
@@ -160,7 +179,7 @@ public:
 	{
 		zoom_multiplier = z;
 		S.SetZoom(zoom_multiplier);
-		km.ResetKeySize();
+		km.ResetKeySize(szUsingLayout);
 		RECT rWindow;
 		GetClientRect(m_hWindow, &rWindow);
 		ClientToScreen(m_hWindow, (LPPOINT)&rWindow);
@@ -180,6 +199,33 @@ public:
 		BYTE bAlpha = (BYTE)min(alpha * 256.0f, 255.0f);
 		SetLayeredWindowAttributes(hWindow, NULL, bAlpha, LWA_ALPHA);
 		UpdateMenuText();
+	}
+	void SetLayoutFile(LPCTSTR file)
+	{
+		lstrcpy(szUsingLayout, file);
+		S.SetZoom(1.0f);
+		LONG ww = S.X(GetPrivateProfileInt(TEXT("keymon"), TEXT("width"), 275, szUsingLayout));
+		LONG wh = S.Y(GetPrivateProfileInt(TEXT("keymon"), TEXT("height"), 58, szUsingLayout));
+		SetOriginalSize(m_hWindow, ww, wh);
+	}
+	void ChooseLayoutFile()
+	{
+		TCHAR fileName[MAX_PATH];
+		OPENFILENAME ofn{};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = m_hWindow;
+		ofn.lpstrFilter = TEXT("配置设置\0*.ini\0所有文件\0*\0\0");
+		ofn.lpstrFile = szUsingLayout;
+		ofn.lpstrTitle = TEXT("选择布局文件");
+		ofn.nMaxFile = ARRAYSIZE(szUsingLayout);
+		ofn.lpstrFileTitle = fileName;
+		ofn.nMaxFileTitle = ARRAYSIZE(fileName);
+		ofn.Flags = OFN_FILEMUSTEXIST;
+		ofn.lpstrDefExt = TEXT("ini");
+		TCHAR* pl = wcsrchr(szUsingLayout, '\\');
+		lstrcpy(fileName, pl ? pl + 1 : szUsingLayout);
+		if (GetOpenFileName(&ofn))
+			SetLayoutFile(ofn.lpstrFile);
 	}
 	void UpdateMenuText()
 	{
@@ -301,6 +347,7 @@ LRESULT CALLBACK ProcessMessage(HWND h, UINT m, WPARAM w, LPARAM l)
 		case IDM_ZOOM_OUT:ws.SetZoom(max(ws.GetZoom() - 0.25f, 0.25f)); break;
 		case IDM_ALPHA_INCREASE:ws.SetAlpha(min(ws.GetAlpha() + 0.25f, 1.0f)); break;
 		case IDM_ALPHA_DECREASE:ws.SetAlpha(max(ws.GetAlpha() - 0.25f, 0.25f)); break;
+		case ID_MENU_LAYOUT:ws.ChooseLayoutFile(); break;
 		}
 		break;
 	}
@@ -328,7 +375,7 @@ ATOM RegWindowClass(HINSTANCE hI, WNDPROC fP, LPCTSTR cn)
 }
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR szCmdLine, int iCmdShow)
 {
-	km.ResetKeySize();
+	km.ResetKeySize(TEXT(".\\keymon.ini"));
 	//生成窗口
 	PCTSTR wcl_name = TEXT("KeyWindow");
 	if (!RegWindowClass(hInstance, ProcessMessage, wcl_name))return -1;
@@ -342,6 +389,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR szCmdLi
 	ShowWindow(hWindow, iCmdShow);
 	hMenu = GetSubMenu(LoadMenu(hInstance, MAKEINTRESOURCE(IDR_MENU_APP)), 0);
 	ws.SetOriginalSize(hWindow, ww, wh);
+	ws.SetLayoutFile(TEXT(".\\keymon.ini"));
 	HACCEL haApp = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR_APP));
 	//获取钩子
 	HHOOK hkKey = SetWindowsHookEx(WH_KEYBOARD_LL, ProcessHook, hInstance, 0);

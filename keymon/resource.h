@@ -12,13 +12,14 @@
 #define IDM_ZOOM_IN                     40010
 #define IDM_ALPHA_INCREASE              40017
 #define IDM_ALPHA_DECREASE              40018
+#define ID_MENU_LAYOUT                  40022
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        104
-#define _APS_NEXT_COMMAND_VALUE         40022
+#define _APS_NEXT_COMMAND_VALUE         40023
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
