@@ -3,8 +3,12 @@
 //img=<path>
 //keyboardoff=<left> <top> <width> <height>  ;同时作为窗口大小
 //keyboardon=<left> <top> <width> <height>
-//lightoff=<left> <top> <width> <height>
-//lighton=<left> <top> <width> <height>
+//capsoff=<left> <top> <width> <height>
+//capson=<left> <top> <width> <height>
+//scrolloff=<left> <top> <width> <height>
+//scrollon=<left> <top> <width> <height>
+//numoff=<left> <top> <width> <height>
+//numon=<left> <top> <width> <height>
 //capslight=<left> <top> <width> <height>    ;相对于keyboardoff
 //scrolllight=<left> <top> <width> <height>  ;相对于keyboardoff
 //numlight=<left> <top> <width> <height>     ;相对于keyboardoff
@@ -66,7 +70,7 @@ struct KeyManager
 {
 	bool keys[KEYS_NUM];
 	Gdiplus::Rect rkeys[KEYS_NUM], rlightcap, rlightscroll, rlightnum;
-	Gdiplus::Bitmap *bmpBack, *bmpFore, *bmpLighton, *bmpLightoff;
+	Gdiplus::Bitmap *bmpBack, *bmpFore, *bmpCapson, *bmpCapsoff, *bmpScrollon, *bmpScrolloff, *bmpNumon, *bmpNumoff;
 	void ResetKeySize(LPCTSTR configFile)
 	{
 		std::wstring imgpath = GetINIString(configFile, TEXT("img"), TEXT(""));
@@ -78,8 +82,12 @@ struct KeyManager
 		ReleaseImg();
 		bmpBack = img->Clone(GetINIRect(configFile, TEXT("keyboardoff"), 0, 0, 106, 25), PixelFormat32bppARGB);
 		bmpFore = img->Clone(GetINIRect(configFile, TEXT("keyboardon"), 0, 25, 106, 25), PixelFormat32bppARGB);
-		bmpLightoff = img->Clone(GetINIRect(configFile, TEXT("lightoff"), 0, 0, 0, 0), PixelFormat32bppARGB);
-		bmpLighton = img->Clone(GetINIRect(configFile, TEXT("lighton"), 0, 0, 0, 0), PixelFormat32bppARGB);
+		bmpCapsoff = img->Clone(GetINIRect(configFile, TEXT("capsoff"), 0, 0, 0, 0), PixelFormat32bppARGB);
+		bmpCapson = img->Clone(GetINIRect(configFile, TEXT("capson"), 0, 0, 0, 0), PixelFormat32bppARGB);
+		bmpScrolloff = img->Clone(GetINIRect(configFile, TEXT("scrolloff"), 0, 0, 0, 0), PixelFormat32bppARGB);
+		bmpScrollon = img->Clone(GetINIRect(configFile, TEXT("scrollon"), 0, 0, 0, 0), PixelFormat32bppARGB);
+		bmpNumoff = img->Clone(GetINIRect(configFile, TEXT("numoff"), 0, 0, 0, 0), PixelFormat32bppARGB);
+		bmpNumon = img->Clone(GetINIRect(configFile, TEXT("numon"), 0, 0, 0, 0), PixelFormat32bppARGB);
 		delete img;
 
 		int nShowKeys = 0;
@@ -123,26 +131,31 @@ struct KeyManager
 		switch (vk)
 		{
 		case VK_CAPITAL:
-			b = (GetKeyState(vk) & 1) ? bmpLighton : bmpLightoff;
+			b = (GetKeyState(vk) & 1) ? bmpCapson : bmpCapsoff;
 			gr.DrawImage(b, rlightcap);
 			break;
 		case VK_SCROLL:
-			b = (GetKeyState(vk) & 1) ? bmpLighton : bmpLightoff;
+			b = (GetKeyState(vk) & 1) ? bmpScrollon : bmpScrolloff;
 			gr.DrawImage(b, rlightscroll);
 			break;
 		case VK_NUMLOCK:
-			b = (GetKeyState(vk) & 1) ? bmpLighton : bmpLightoff;
+			b = (GetKeyState(vk) & 1) ? bmpNumon : bmpNumoff;
 			gr.DrawImage(b, rlightnum);
 			break;
 		}
 	}
-	KeyManager() :bmpBack(nullptr), bmpFore(nullptr), bmpLightoff(nullptr), bmpLighton(nullptr) {}
+	KeyManager() :bmpBack(nullptr), bmpFore(nullptr), bmpCapsoff(nullptr), bmpCapson(nullptr), bmpScrolloff(nullptr), bmpScrollon(nullptr),
+		bmpNumoff(nullptr), bmpNumon(nullptr) {}
 	void ReleaseImg()
 	{
 		delete bmpBack;
 		delete bmpFore;
-		delete bmpLightoff;
-		delete bmpLighton;
+		delete bmpCapsoff;
+		delete bmpCapson;
+		delete bmpScrolloff;
+		delete bmpScrollon;
+		delete bmpNumoff;
+		delete bmpNumon;
 	}
 }km;
 
