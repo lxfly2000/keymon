@@ -87,6 +87,8 @@
 				ctx.fillRect(0,0,elemCanvas.width,elemCanvas.height);
 			}
 			ctx.lineWidth=thick*zoom;
+			ctx.textAlign="center";
+			ctx.textBaseline="middle";
 			for(var i=0;i<255;i++){
 				var sr=new RegExp("\\n"+i+"=(\\d+) (\\d+) (\\d+) (\\d+)(.*)");
 				var msr=userinput.match(sr);
@@ -115,7 +117,15 @@
 							}
 						}
 						var tw=ctx.measureText(name).width;
-						ctx.fillText(name,x+w/2-tw/2,y+h/2+fontSize/2);
+						if(tw>w-distance*2){
+							ctx.save();
+							ctx.translate(x+w/2,y+h/2);
+							ctx.scale((w-distance*2)/tw,1);
+							ctx.fillText(name,0,0);
+							ctx.restore();
+						}else{
+							ctx.fillText(name,x+w/2,y+h/2);
+						}
 					}
 				}
 			}
