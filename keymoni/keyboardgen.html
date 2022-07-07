@@ -1,0 +1,129 @@
+﻿
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,user-scalable=no"/>
+		<title>键盘布局生成工具</title>
+		<style>
+			input[type="number"]{
+				width: 3em;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="CanvasRoot">
+			<canvas id="canvas1" width="0" height="0">你的浏览器不支持 Canvas, 请换一个浏览器。</canvas><br/>
+		</div>
+		<p>
+			间距(px):<input type="number" id="editDistance" value="1"/>
+			圆角(px):<input type="number" id="editRound" value="1"/>
+			粗细(px):<input type="number" id="editThick" value="2"/>
+			字号(px):<input type="number" id="editFontSize" value="12"/>
+			缩放：<input type="number" id="editZoom" value="1"/><br/>
+			字体：<input type="text" id="editFontName" value="monospace" style="width: 10em;"/>
+			背景色：<input type="color" id="colorBg" value="#FFFFFF"/>
+			文字色：<input type="color" id="colorText" value="#000000"/>
+		</p>
+		<input type="file" id="srcFile" accept="*"/>
+		<input type="button" value="生成" onclick="ReadFile()"/>
+		<input type="button" value="保存" onClick="Download()"/>
+	</body>
+	<script type="text/javascript">
+		function ReadFile(){
+			/**@type {FileList}*/var inputFile=document.getElementById("srcFile").files;
+			if(inputFile.length==0){
+				alert("未选择文件。");
+				return;
+			}
+			const fileReader=new FileReader();
+			fileReader.readAsText(inputFile[0]);
+			fileReader.onload=()=>{Generate(fileReader.result);};
+		}
+		function DrawRoundedRect(ctx,x,y,w,h,r){
+			ctx.beginPath();
+			ctx.moveTo(x+r,y);
+			ctx.lineTo(x+w-r,y);
+			ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+			ctx.lineTo(x+w,y+h-r);
+			ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+			ctx.lineTo(x+r,y+h);
+			ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+			ctx.lineTo(x,y+r);
+			ctx.quadraticCurveTo(x,y,x+r,y);
+			ctx.closePath();
+			ctx.stroke();
+		}
+		function Generate(userinput){
+			"use strict";
+			var kom=userinput.match(/keyboardoff=(\d+) (\d+) (\d+) (\d+)/);
+			var elemCanvas=document.getElementById("canvas1");
+			var zoom=parseFloat(document.getElementById("editZoom").value);
+			elemCanvas.width=kom[3]*zoom;
+			elemCanvas.height=kom[4]*zoom;
+			var distance=parseInt(document.getElementById("editDistance").value);
+			var round=parseInt(document.getElementById("editRound").value);
+			var thick=parseInt(document.getElementById("editThick").value);
+			var fontSize=parseInt(document.getElementById("editFontSize").value);
+			var fontName=document.getElementById("editFontName").value;
+			var cbg=document.getElementById("colorBg").value;
+			var ctext=document.getElementById("colorText").value;
+			/**@type {CanvasRenderingContext2D}*/var ctx=elemCanvas.getContext("2d");
+			ctx.fillStyle=cbg;//直接给“#xxxxxx”的字符串就能设置颜色
+			ctx.fillRect(0,0,elemCanvas.width,elemCanvas.height);
+			ctx.fillStyle=ctext;
+			ctx.lineWidth=thick*zoom;
+			for(var i=0;i<255;i++){
+				var sr=new RegExp("\\n"+i+"=(\\d+) (\\d+) (\\d+) (\\d+)(.*)");
+				var msr=userinput.match(sr);
+				if(msr!=null){
+					var x=parseInt(msr[1])*zoom,y=parseInt(msr[2])*zoom,w=parseInt(msr[3])*zoom,h=parseInt(msr[4])*zoom;
+					var mname=msr[5].match(/^ ([^ ]+)/);
+					var name=i.toString();
+					var fn=fontName;
+					if(mname!=null){
+						name=mname[1];
+						mname=msr[5].substr(name.length+1).match(/ (.*)$/);
+						if(mname!=null){
+							fn=mname[1];
+						}
+					}
+					DrawRoundedRect(ctx,x+distance,y+distance,w-distance*2,h-distance*2,round);
+					ctx.font=fontSize*zoom+"px "+fn;
+					var mec=name.match(/<[0-9A-F]+>/g);
+					if(mec!=null){
+						for(var j=0;j<mec.length;j++){
+							name=name.replace(new RegExp(mec[j],"g"),String.fromCharCode(parseInt(mec[j].substr(1,mec[j].length-2),16)));
+						}
+					}
+					var tw=ctx.measureText(name).width;
+					ctx.fillText(name,x+w/2-tw/2,y+h/2+fontSize/2);
+				}
+			}
+		}
+		function Download(){
+			var c1=document.getElementById("canvas1");
+			downloadFile("keyboard.png",c1.toDataURL());
+		}
+		function base64Img2Blob(code){
+			var parts = code.split(';base64,');
+			var contentType = parts[0].split(':')[1];
+			var raw = window.atob(parts[1]);
+			var rawLength = raw.length;
+			var uInt8Array = new Uint8Array(rawLength);
+			for (var i = 0; i < rawLength; ++i) {
+				uInt8Array[i] = raw.charCodeAt(i);
+			}
+			return new Blob([uInt8Array], {type: contentType});
+		}
+		function downloadFile(fileName, content){
+			var aLink = document.createElement('a');
+			var blob = base64Img2Blob(content); //new Blob([content]);
+			var event = document.createEvent('MouseEvents');
+			event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+			aLink.download = fileName;
+			aLink.href = URL.createObjectURL(blob);
+			aLink.dispatchEvent(event);
+		}
+	</script>
+</html>
