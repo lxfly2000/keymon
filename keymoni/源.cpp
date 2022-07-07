@@ -219,9 +219,7 @@ public:
 		lstrcpy(szUsingLayout, file);
 		S.SetZoom(GetSystemZoom());
 		Gdiplus::Rect r = GetINIRect(szUsingLayout, TEXT("keyboardoff"), 0, 0, 106, 25);
-		LONG ww = S.P(r.Width);
-		LONG wh = S.P(r.Height);
-		SetOriginalSize(m_hWindow, ww, wh);
+		SetOriginalSize(m_hWindow, r.Width, r.Height);
 	}
 	void ChooseLayoutFile()
 	{
@@ -278,7 +276,7 @@ void OnPaint(HWND h, WPARAM w, LPARAM l)
 	GetClientRect(h, &clientRect);
 	Gdiplus::Bitmap bmpBack(km.bmpBack->GetWidth(), km.bmpBack->GetHeight());
 	Gdiplus::Graphics grFront(hDC), grBack(&bmpBack);
-	grBack.DrawImage(km.bmpBack, 0, 0);
+	grBack.DrawImage(km.bmpBack, 0, 0, bmpBack.GetWidth(), bmpBack.GetHeight());
 	grFront.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 	for (int i = 0; i < ARRAYSIZE(km.keys); i++)
 	{
@@ -388,7 +386,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR szCmdLi
 	if (!RegWindowClass(hInstance, ProcessMessage, wcl_name))
 		return -1;
 	Gdiplus::Rect r = GetINIRect(TEXT(CONFIG_FILE), TEXT("keyboardoff"), 0, 0, 106, 25);
-	S.SetZoom(GetSystemZoom());
 	LONG ww = S.P(r.Width), wh = S.P(r.Height);
 	RECT rWindow = { 0,0,ww,wh };
 	ws.SetStyle(WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
