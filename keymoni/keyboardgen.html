@@ -22,8 +22,10 @@
 			字号(px):<input type="number" id="editFontSize" value="12"/>
 			缩放：<input type="number" id="editZoom" value="1"/><br/>
 			字体：<input type="text" id="editFontName" value="monospace" style="width: 10em;"/>
-			背景色：<input type="color" id="colorBg" value="#FFFFFF"/>
-			文字色：<input type="color" id="colorText" value="#000000"/>
+			<input type="checkbox" id="checkBg" checked/><label for="checkBg">背景色：</label><input type="color" id="colorBg" value="#FFFFFF"/>
+			<input type="checkbox" id="checkFill" checked/><label for="checkFill">填充色：</label><input type="color" id="colorFill" value="#FFFFFF"/>
+			<input type="checkbox" id="checkBorder" checked/><label for="checkBorder">边框色：</label><input type="color" id="colorBorder" value="#000000"/>
+			<input type="checkbox" id="checkText" checked/><label for="checkText">文字色：</label><input type="color" id="colorText" value="#000000"/>
 		</p>
 		<input type="file" id="srcFile" accept="*"/>
 		<input type="button" value="生成" onclick="ReadFile()"/>
@@ -40,7 +42,7 @@
 			fileReader.readAsText(inputFile[0]);
 			fileReader.onload=()=>{Generate(fileReader.result);};
 		}
-		function DrawRoundedRect(ctx,x,y,w,h,r){
+		function DrawRoundedRect(ctx,x,y,w,h,r,bfill,bstroke){
 			ctx.beginPath();
 			ctx.moveTo(x+r,y);
 			ctx.lineTo(x+w-r,y);
@@ -52,7 +54,15 @@
 			ctx.lineTo(x,y+r);
 			ctx.quadraticCurveTo(x,y,x+r,y);
 			ctx.closePath();
-			ctx.stroke();
+			if(bfill){
+				ctx.fill();
+			}
+			if(bstroke){
+				ctx.stroke();
+			}
+		}
+		function IsChecked(id){
+			return document.getElementById(id).checked;
 		}
 		function Generate(userinput){
 			"use strict";
@@ -68,10 +78,14 @@
 			var fontName=document.getElementById("editFontName").value;
 			var cbg=document.getElementById("colorBg").value;
 			var ctext=document.getElementById("colorText").value;
+			var cfill=document.getElementById("colorFill").value;
+			var cborder=document.getElementById("colorBorder").value;
 			/**@type {CanvasRenderingContext2D}*/var ctx=elemCanvas.getContext("2d");
-			ctx.fillStyle=cbg;//直接给“#xxxxxx”的字符串就能设置颜色
-			ctx.fillRect(0,0,elemCanvas.width,elemCanvas.height);
-			ctx.fillStyle=ctx.strokeStyle=ctext;
+			ctx.clearRect(0,0,elemCanvas.width,elemCanvas.height);
+			if(IsChecked("checkBg")){
+				ctx.fillStyle=cbg;//直接给“#xxxxxx”的字符串就能设置颜色
+				ctx.fillRect(0,0,elemCanvas.width,elemCanvas.height);
+			}
 			ctx.lineWidth=thick*zoom;
 			for(var i=0;i<255;i++){
 				var sr=new RegExp("\\n"+i+"=(\\d+) (\\d+) (\\d+) (\\d+)(.*)");
@@ -88,16 +102,21 @@
 							fn=mname[1];
 						}
 					}
-					DrawRoundedRect(ctx,x+distance,y+distance,w-distance*2,h-distance*2,round);
-					ctx.font=fontSize*zoom+"px "+fn;
-					var mec=name.match(/<[0-9A-F]+>/g);
-					if(mec!=null){
-						for(var j=0;j<mec.length;j++){
-							name=name.replace(new RegExp(mec[j],"g"),String.fromCharCode(parseInt(mec[j].substr(1,mec[j].length-2),16)));
+					ctx.fillStyle=cfill;
+					ctx.strokeStyle=cborder;
+					DrawRoundedRect(ctx,x+distance,y+distance,w-distance*2,h-distance*2,round,IsChecked("checkFill"),IsChecked("checkBorder"));
+					if(IsChecked("checkText")){
+						ctx.fillStyle=ctext;
+						ctx.font=fontSize*zoom+"px "+fn;
+						var mec=name.match(/<[0-9A-F]+>/g);
+						if(mec!=null){
+							for(var j=0;j<mec.length;j++){
+								name=name.replace(new RegExp(mec[j],"g"),String.fromCharCode(parseInt(mec[j].substr(1,mec[j].length-2),16)));
+							}
 						}
+						var tw=ctx.measureText(name).width;
+						ctx.fillText(name,x+w/2-tw/2,y+h/2+fontSize/2);
 					}
-					var tw=ctx.measureText(name).width;
-					ctx.fillText(name,x+w/2-tw/2,y+h/2+fontSize/2);
 				}
 			}
 		}
