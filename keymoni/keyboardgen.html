@@ -71,7 +71,7 @@
 			/**@type {CanvasRenderingContext2D}*/var ctx=elemCanvas.getContext("2d");
 			ctx.fillStyle=cbg;//直接给“#xxxxxx”的字符串就能设置颜色
 			ctx.fillRect(0,0,elemCanvas.width,elemCanvas.height);
-			ctx.fillStyle=ctext;
+			ctx.fillStyle=ctx.strokeStyle=ctext;
 			ctx.lineWidth=thick*zoom;
 			for(var i=0;i<255;i++){
 				var sr=new RegExp("\\n"+i+"=(\\d+) (\\d+) (\\d+) (\\d+)(.*)");
